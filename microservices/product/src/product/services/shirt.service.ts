@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ShirtRepository } from '../repositories/shirt.repository';
 import { Shirt } from '../entities/shirt.entity';
 
@@ -9,9 +9,14 @@ export class ShirtService {
 
   async create(payload: Shirt): Promise<boolean> {
     try {
-      return this.repository.create(payload) != null ? true : false;
+      return (await this.repository.create(payload)) != null ? true : false;
     } catch (error) {
-      throw new Error('Erro ao tentar criar nova camisa');
+      console.log(error.message);
+
+      throw new HttpException(
+        'Falha ao tentar criar nova camisa',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

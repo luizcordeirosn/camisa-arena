@@ -17,7 +17,10 @@ model Shirt {
   id          Int     @id @default(autoincrement())
   model       String
   size        String
+  price       Float   @default(0)
+  quantity    Int     @default(1)
   description String?
 
+  @@unique([model, size])
   @@map("shirts")
 }

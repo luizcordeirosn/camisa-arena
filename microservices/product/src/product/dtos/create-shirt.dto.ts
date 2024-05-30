@@ -1,4 +1,11 @@
-import { IsIn, IsOptional, IsString } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CreateShirtDto {
   @IsString()
@@ -7,6 +14,14 @@ export class CreateShirtDto {
   @IsString()
   @IsIn(['PP', 'P', 'M', 'G', 'GG', 'XG', 'XGG', 'EG', 'EGG'])
   size: string;
+
+  @IsNumber()
+  price: number;
+
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  quantity: number;
 
   @IsString()
   @IsOptional()
