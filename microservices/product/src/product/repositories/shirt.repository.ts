@@ -14,4 +14,16 @@ export class ShirtRepository {
       },
     });
   }
+
+  async findAll(skip: number, take: number): Promise<Shirt[]> {
+    return await this.prisma.shirt.findMany({
+      orderBy: [{ model: 'asc' }, { updatedAt: 'desc' }],
+      skip,
+      take,
+    });
+  }
+
+  async count(): Promise<number> {
+    return await this.prisma.shirt.count();
+  }
 }

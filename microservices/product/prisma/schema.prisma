@@ -14,12 +14,14 @@ datasource db {
 }
 
 model Shirt {
-  id          Int     @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   model       String
   size        String
-  price       Float   @default(0)
-  quantity    Int     @default(1)
+  price       Float    @default(0)
+  quantity    Int      @default(1)
   description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 
   @@unique([model, size])
   @@map("shirts")
