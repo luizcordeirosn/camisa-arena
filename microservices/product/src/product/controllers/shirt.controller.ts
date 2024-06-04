@@ -6,11 +6,13 @@ import {
   Inject,
   ParseIntPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { ShirtService } from '../services/shirt.service';
 import { CreateShirtDto } from '../dtos/create-shirt.dto';
 import { FindAllShirtDto } from '../dtos/find-all-shirt.dto';
+import { updateShirtDto } from '../dtos/update-shirt.dto';
 
 @Controller('shirt')
 export class ShirtController {
@@ -21,8 +23,18 @@ export class ShirtController {
   async create(@Body() payload: CreateShirtDto): Promise<boolean> {
     try {
       return this.service.create({
+        model: payload.model.toUpperCase,
         ...payload,
       });
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  @Put()
+  async updatePriceByModel(@Body() payload: updateShirtDto): Promise<boolean> {
+    try {
+      return this.service.updatePriceByModel(payload);
     } catch (error) {
       throw new Error(error);
     }

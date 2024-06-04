@@ -15,6 +15,43 @@ export class ShirtRepository {
     });
   }
 
+  async updateQuantityByModelAndSize(
+    model: string,
+    size: string,
+    quantity: number,
+  ): Promise<boolean> {
+    return (
+      await this.prisma.shirt.updateMany({
+        where: {
+          model,
+          size,
+        },
+        data: {
+          quantity: {
+            increment: quantity,
+          },
+        },
+      })
+    ).count > 0
+      ? true
+      : false;
+  }
+
+  async updatePriceByModel(price: number, model: string): Promise<boolean> {
+    return (
+      await this.prisma.shirt.updateMany({
+        where: {
+          model,
+        },
+        data: {
+          price,
+        },
+      })
+    ).count > 0
+      ? true
+      : false;
+  }
+
   async findAll(skip: number, take: number): Promise<Shirt[]> {
     return await this.prisma.shirt.findMany({
       orderBy: [{ model: 'asc' }, { updatedAt: 'desc' }],
