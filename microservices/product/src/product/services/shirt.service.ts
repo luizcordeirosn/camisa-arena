@@ -5,11 +5,16 @@ import { FindAllShirtDto } from '../dtos/find-all-shirt.dto';
 import { getPagination } from '../utils/get-pagination';
 import { updateShirtDto } from '../dtos/update-shirt.dto';
 import { UpdateQuantityShirtDto } from '../dtos/update-quantity-shirt.dto';
+import { MessageSender } from '../utils/rabbitmq/message.sender';
+import { UpdateOrderStatus } from '../dtos/update-order-status.dto';
 
 @Injectable()
 export class ShirtService {
   @Inject()
   private readonly repository: ShirtRepository;
+
+  @Inject()
+  private readonly sender: MessageSender;
 
   async create(payload: Shirt): Promise<boolean> {
     try {
@@ -42,7 +47,6 @@ export class ShirtService {
       );
     } catch (error) {
       console.log(error.message);
-
       throw new HttpException(
         'Falha ao atualizar o preço da camisa',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -50,13 +54,17 @@ export class ShirtService {
     }
   }
 
-  async updateQuantityById(
-    payload: UpdateQuantityShirtDto[],
-  ): Promise<boolean> {
+  async updateQuantityById(payload: UpdateQuantityShirtDto): Promise<boolean> {
     try {
-      payload.map(async (item) => {
+      payload.products.map(async (item) => {
         await this.repository.updateQuantityById(item);
       });
+      const dto: UpdateOrderStatus = {
+        orderId: payload.orderId,
+        status: true,
+      };
+
+      this.sender.send(JSON.stringify(dto));
       return true;
     } catch (error) {
       console.log(error.message);
@@ -76,7 +84,6 @@ export class ShirtService {
       };
     } catch (error) {
       console.log(error.message);
-
       throw new HttpException(
         'Falha ao listar todas as camisas',
         HttpStatus.INTERNAL_SERVER_ERROR,

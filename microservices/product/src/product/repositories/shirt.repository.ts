@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
+import { PurchasedShirt } from '../dtos/purchased-shirt.dto';
 import { Shirt } from '../entities/shirt.entity';
-import { UpdateQuantityShirtDto } from '../dtos/update-quantity-shirt.dto';
 
 @Injectable()
 export class ShirtRepository {
@@ -38,8 +38,7 @@ export class ShirtRepository {
       : false;
   }
 
-  async updateQuantityById(payload: UpdateQuantityShirtDto): Promise<Shirt> {
-    console.log(payload);
+  async updateQuantityById(payload: PurchasedShirt): Promise<Shirt> {
     return await this.prisma.shirt.update({
       where: {
         id: payload.productId,

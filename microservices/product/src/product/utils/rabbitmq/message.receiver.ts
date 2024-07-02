@@ -1,12 +1,11 @@
-import * as amqp from 'amqplib';
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, OnModuleInit } from '@nestjs/common';
 import { ShirtService } from 'src/product/services/shirt.service';
 import { UpdateQuantityShirtDto } from 'src/product/dtos/update-quantity-shirt.dto';
+import { RabbitMQConfig } from './rabbitmq.config';
 
-@Injectable()
 export class MessageReceiver implements OnModuleInit {
-  QUEUE_NAME = 'orderCreated';
-  EXCHANGE_NAME = 'orderExchange';
+  QUEUE_NAME = 'createdOrder';
+  EXCHANGE_NAME = 'createdExchange';
   ROUTING_KEY = 'orderKey';
 
   @Inject()
@@ -14,23 +13,25 @@ export class MessageReceiver implements OnModuleInit {
 
   async receive() {
     try {
-      const connection = await amqp.connect('amqp://localhost');
-      const channal = await connection.createChannel();
-      await channal.assertExchange(this.EXCHANGE_NAME, 'direct');
-      await channal.assertQueue(this.QUEUE_NAME, { durable: true });
-      await channal.bindQueue(
+      const rabbitmq = RabbitMQConfig.rabbitmqConfig;
+      await rabbitmq.start();
+
+      await rabbitmq.channel.assertExchange(this.EXCHANGE_NAME, 'direct');
+      await rabbitmq.channel.assertQueue(this.QUEUE_NAME, { durable: true });
+      await rabbitmq.channel.bindQueue(
         this.QUEUE_NAME,
         this.EXCHANGE_NAME,
         this.ROUTING_KEY,
       );
 
-      channal.consume(this.QUEUE_NAME, async (msg) => {
+      rabbitmq.channel.consume(this.QUEUE_NAME, async (msg) => {
         if (msg != null) {
-          const obj = <UpdateQuantityShirtDto[]>(
+          const obj = <UpdateQuantityShirtDto>(
             JSON.parse(msg.content.toString())
           );
+          console.log(obj);
           await this.service.updateQuantityById(obj);
-          channal.ack(msg);
+          rabbitmq.channel.ack(msg);
         }
       });
     } catch (error) {}

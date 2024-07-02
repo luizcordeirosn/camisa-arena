@@ -9,7 +9,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import com.microservice.order.dtos.CreateOrderDto;
-import com.microservice.order.dtos.PurchasedProduct;
+import com.microservice.order.dtos.PurchasedShirt;
+import com.microservice.order.dtos.UpdateQuantityShirtDto;
 import com.microservice.order.entities.Order;
 import com.microservice.order.repositories.OrderRepository;
 import com.microservice.order.utils.rabbitmq.MessageSender;
@@ -30,13 +31,19 @@ public class OrderServiceImpl implements OrderService{
         try {
             Order order = Order.builder()
                     .purchase(payload.getPurchase())
-                    .products(payload.getProducts().stream().map(PurchasedProduct::getProductId).collect(Collectors.toList()))
+                    .products(payload.getProducts().stream().map(PurchasedShirt::getProductId).collect(Collectors.toList()))
                     .status(payload.getStatus())
                     .build();
+            
+            Order createdOrder = repository.save(order);
 
-            ret = (repository.save(order) != null) ? true : false;
+            ret = (createdOrder != null) ? true : false;
             if(ret) {
-                sender.sendMessage(gson.toJson(payload.getProducts()));
+                UpdateQuantityShirtDto dto = UpdateQuantityShirtDto.builder()
+                    .orderId(createdOrder.getId())
+                    .products(payload.getProducts())
+                    .build();
+                sender.sendMessage(gson.toJson(dto));
             }
         } catch (Exception e) {
             throw new Exception("Falha ao tentar realizar compra - " + e.getMessage());

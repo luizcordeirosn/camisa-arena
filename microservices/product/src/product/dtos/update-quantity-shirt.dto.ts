@@ -1,9 +1,6 @@
-import { IsNumber } from 'class-validator';
+import { PurchasedShirt } from './purchased-shirt.dto';
 
 export class UpdateQuantityShirtDto {
-  @IsNumber()
-  quantity: number;
-
-  @IsNumber()
-  productId: number;
+  orderId: number;
+  products: PurchasedShirt[];
 }
