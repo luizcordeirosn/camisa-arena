@@ -4,6 +4,7 @@ import { Shirt } from '../entities/shirt.entity';
 import { FindAllShirtDto } from '../dtos/find-all-shirt.dto';
 import { getPagination } from '../utils/get-pagination';
 import { updateShirtDto } from '../dtos/update-shirt.dto';
+import { UpdateQuantityShirtDto } from '../dtos/update-quantity-shirt.dto';
 
 @Injectable()
 export class ShirtService {
@@ -46,6 +47,20 @@ export class ShirtService {
         'Falha ao atualizar o preço da camisa',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  async updateQuantityById(
+    payload: UpdateQuantityShirtDto[],
+  ): Promise<boolean> {
+    try {
+      payload.map(async (item) => {
+        await this.repository.updateQuantityById(item);
+      });
+      return true;
+    } catch (error) {
+      console.log(error.message);
+      return false;
     }
   }
 
